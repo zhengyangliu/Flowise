@@ -100,7 +100,8 @@ export const INPUT_PARAMS_TYPE = [
     'date',
     'file',
     'folder',
-    'tabs'
+    'tabs',
+    'zodSchema'
 ]
 
 export const LICENSE_QUOTAS = {

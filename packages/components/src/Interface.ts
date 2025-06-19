@@ -105,6 +105,7 @@ export interface INodeParams {
     hide?: INodeDisplay
     generateDocStoreDescription?: boolean
     generateInstruction?: boolean
+    requiresLargeDialog?: boolean
 }
 
 export interface INodeExecutionData {

@@ -35,7 +35,7 @@ const AdditionalParamsDialog = ({ show, dialogProps, onCancel }) => {
             onClose={onCancel}
             open={show}
             fullWidth
-            maxWidth='sm'
+            maxWidth={inputParams.some((param) => param.requiresLargeDialog === true) ? 'lg' : 'sm'}
             aria-labelledby='alert-dialog-title'
             aria-describedby='alert-dialog-description'
         >

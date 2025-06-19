@@ -137,7 +137,8 @@ export const initNode = (nodeData, newNodeId, isAgentflow) => {
         'file',
         'folder',
         'tabs',
-        'conditionFunction' // This is a special type for condition functions
+        'conditionFunction', // This is a special type for condition functions
+        'zodSchema' // Custom type for Zod schema builder UI
     ]
 
     // Inputs
