@@ -1254,6 +1254,151 @@
                     "output_cost": 0.003
                 }
             ]
+        },
+        {
+            "name": "chatDoubao",
+            "models": [
+                {
+                    "label": "doubao-seed-1.6",
+                    "name": "doubao-seed-1.6",
+                    "description": "Latest Doubao model with enhanced capabilities",
+                    "input_cost": 1.11e-7,
+                    "output_cost": 1.11e-6
+                },
+                {
+                    "label": "doubao-seed-1.6-thinking",
+                    "name": "doubao-seed-1.6-thinking",
+                    "description": "Doubao model with deep thinking capabilities",
+                    "input_cost": 1.11e-7,
+                    "output_cost": 1.11e-6
+                },
+                {
+                    "label": "doubao-seed-1.6-flash",
+                    "name": "doubao-seed-1.6-flash",
+                    "description": "Fast version of Doubao seed model",
+                    "input_cost": 1.11e-7,
+                    "output_cost": 1.11e-6
+                },
+                {
+                    "label": "doubao-1.5-thinking-vision-pro",
+                    "name": "doubao-1.5-thinking-vision-pro",
+                    "description": "Vision-enabled Doubao with thinking capabilities",
+                    "input_cost": 4.17e-7,
+                    "output_cost": 1.25e-6
+                },
+                {
+                    "label": "doubao-1.5-thinking-pro",
+                    "name": "doubao-1.5-thinking-pro",
+                    "description": "Pro version with thinking capabilities",
+                    "input_cost": 4.17e-7,
+                    "output_cost": 1.25e-6
+                },
+                {
+                    "label": "doubao-1.5-pro-32k",
+                    "name": "doubao-1.5-pro-32k",
+                    "description": "Pro model with 32K context length",
+                    "input_cost": 4.17e-7,
+                    "output_cost": 1.25e-6
+                },
+                {
+                    "label": "doubao-1.5-pro-256k",
+                    "name": "doubao-1.5-pro-256k",
+                    "description": "Pro model with 256K context length",
+                    "input_cost": 4.17e-7,
+                    "output_cost": 1.25e-6
+                },
+                {
+                    "label": "doubao-1.5-lite",
+                    "name": "doubao-1.5-lite",
+                    "description": "Lightweight version of Doubao 1.5",
+                    "input_cost": 6.94e-8,
+                    "output_cost": 2.78e-7
+                },
+                {
+                    "label": "doubao-1.5-vision-lite",
+                    "name": "doubao-1.5-vision-lite",
+                    "description": "Vision-enabled lite model",
+                    "input_cost": 6.94e-8,
+                    "output_cost": 2.78e-7
+                },
+                {
+                    "label": "doubao-1.5-vision-pro",
+                    "name": "doubao-1.5-vision-pro",
+                    "description": "Vision-enabled pro model",
+                    "input_cost": 4.17e-7,
+                    "output_cost": 1.25e-6
+                },
+                {
+                    "label": "doubao-vision-pro",
+                    "name": "doubao-vision-pro",
+                    "description": "Vision-enabled Doubao model",
+                    "input_cost": 4.17e-7,
+                    "output_cost": 1.25e-6
+                },
+                {
+                    "label": "doubao-vision-lite",
+                    "name": "doubao-vision-lite",
+                    "description": "Lightweight vision model",
+                    "input_cost": 6.94e-8,
+                    "output_cost": 2.78e-7
+                },
+                {
+                    "label": "doubao-lite-4k",
+                    "name": "doubao-lite-4k",
+                    "description": "Lite model with 4K context",
+                    "input_cost": 6.94e-8,
+                    "output_cost": 2.78e-7
+                },
+                {
+                    "label": "doubao-lite-32k",
+                    "name": "doubao-lite-32k",
+                    "description": "Lite model with 32K context",
+                    "input_cost": 6.94e-8,
+                    "output_cost": 2.78e-7
+                },
+                {
+                    "label": "doubao-lite-128k",
+                    "name": "doubao-lite-128k",
+                    "description": "Lite model with 128K context",
+                    "input_cost": 6.94e-8,
+                    "output_cost": 2.78e-7
+                },
+                {
+                    "label": "doubao-pro-32k",
+                    "name": "doubao-pro-32k",
+                    "description": "Pro model with 32K context",
+                    "input_cost": 4.17e-7,
+                    "output_cost": 1.25e-6
+                },
+                {
+                    "label": "doubao-pro-256k",
+                    "name": "doubao-pro-256k",
+                    "description": "Pro model with 256K context",
+                    "input_cost": 4.17e-7,
+                    "output_cost": 1.25e-6
+                },
+                {
+                    "label": "deepseek-r1",
+                    "name": "deepseek-r1",
+                    "description": "DeepSeek R1 model available on Volcengine",
+                    "input_cost": 2.78e-7,
+                    "output_cost": 1.11e-6
+                },
+                {
+                    "label": "deepseek-v3",
+                    "name": "deepseek-v3",
+                    "description": "DeepSeek V3 model available on Volcengine",
+                    "input_cost": 2.78e-7,
+                    "output_cost": 1.11e-6
+                },
+                {
+                    "label": "moonshot-v1",
+                    "name": "moonshot-v1",
+                    "description": "Moonshot V1 model available on Volcengine",
+                    "input_cost": 2.78e-7,
+                    "output_cost": 1.11e-6
+                }
+            ]
         }
     ],
     "llm": [
