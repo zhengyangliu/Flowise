@@ -1,7 +1,8 @@
-import { ChatOpenAI, ChatOpenAIFields } from '@langchain/openai'
+import { ChatOpenAI as LangchainChatOpenAI, ChatOpenAIFields } from '@langchain/openai'
 import { BaseCache } from '@langchain/core/caches'
-import { ICommonObject, INode, INodeData, INodeParams } from '../../../src/Interface'
+import { ICommonObject, IMultiModalOption, INode, INodeData, INodeParams } from '../../../src/Interface'
 import { getBaseClasses, getCredentialData, getCredentialParam } from '../../../src/utils'
+import { ChatOpenAICustom } from './FlowiseChatOpenAICustom'
 
 class ChatOpenAICustom_ChatModels implements INode {
     label: string
@@ -18,12 +19,12 @@ class ChatOpenAICustom_ChatModels implements INode {
     constructor() {
         this.label = 'ChatOpenAI Custom'
         this.name = 'chatOpenAICustom'
-        this.version = 4.0
+        this.version = 5.0
         this.type = 'ChatOpenAI-Custom'
         this.icon = 'openai.svg'
         this.category = 'Chat Models'
         this.description = 'Custom/FineTuned model using OpenAI Chat compatible API'
-        this.baseClasses = [this.type, ...getBaseClasses(ChatOpenAI)]
+        this.baseClasses = [this.type, ...getBaseClasses(LangchainChatOpenAI)]
         this.credential = {
             label: 'Connect Credential',
             name: 'credential',
@@ -113,6 +114,40 @@ class ChatOpenAICustom_ChatModels implements INode {
                 type: 'json',
                 optional: true,
                 additionalParams: true
+            },
+            {
+                label: 'Allow Image Uploads',
+                name: 'allowImageUploads',
+                type: 'boolean',
+                description:
+                    'Allow image input. Refer to the <a href="https://docs.flowiseai.com/using-flowise/uploads#image" target="_blank">docs</a> for more details.',
+                default: false,
+                optional: true
+            },
+            {
+                label: 'Image Resolution',
+                description: 'This parameter controls the resolution in which the model views the image.',
+                name: 'imageResolution',
+                type: 'options',
+                options: [
+                    {
+                        label: 'Low',
+                        name: 'low'
+                    },
+                    {
+                        label: 'High',
+                        name: 'high'
+                    },
+                    {
+                        label: 'Auto',
+                        name: 'auto'
+                    }
+                ],
+                default: 'low',
+                optional: false,
+                show: {
+                    allowImageUploads: true
+                }
             }
         ]
     }
@@ -129,6 +164,9 @@ class ChatOpenAICustom_ChatModels implements INode {
         const basePath = nodeData.inputs?.basepath as string
         const baseOptions = nodeData.inputs?.baseOptions
         const cache = nodeData.inputs?.cache as BaseCache
+
+        const allowImageUploads = nodeData.inputs?.allowImageUploads as boolean
+        const imageResolution = nodeData.inputs?.imageResolution as string
 
         const credentialData = await getCredentialData(nodeData.credential ?? '', options)
         const openAIApiKey = getCredentialParam('openAIApiKey', credentialData, nodeData)
@@ -164,7 +202,15 @@ class ChatOpenAICustom_ChatModels implements INode {
             }
         }
 
-        const model = new ChatOpenAI(obj)
+        const multiModalOption: IMultiModalOption = {
+            image: {
+                allowImageUploads: allowImageUploads ?? false,
+                imageResolution
+            }
+        }
+
+        const model = new ChatOpenAICustom(nodeData.id, obj)
+        model.setMultiModalOption(multiModalOption)
         return model
     }
 }
