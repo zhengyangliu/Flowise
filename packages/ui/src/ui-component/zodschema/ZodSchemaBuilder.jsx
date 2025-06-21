@@ -15,13 +15,11 @@ import {
     Switch,
     TextField,
     Typography,
-    Divider,
     Popover
 } from '@mui/material'
 import {
     Add as AddIcon,
     Delete as DeleteIcon,
-    Code as CodeIcon,
     Settings as SettingsIcon,
     AccountTree as ObjectIcon,
     ViewList as ArrayIcon,
@@ -46,7 +44,7 @@ const ENUM_VALIDATIONS = ['enumValues']
 
 export const ZodSchema = ({ value, onChange, disabled = false }) => {
     const [fields, setFields] = useState([])
-    const [generatedSchema, setGeneratedSchema] = useState('')
+
     const [globalExpanded, setGlobalExpanded] = useState(true)
 
     useEffect(() => {
@@ -75,132 +73,6 @@ export const ZodSchema = ({ value, onChange, disabled = false }) => {
             setFields([])
         }
     }, [value])
-
-    useEffect(() => {
-        generateSchemaPreview()
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [fields])
-
-    const generateSchemaPreview = () => {
-        try {
-            const schemaLines = ['z.object({']
-
-            fields.forEach((field, index) => {
-                const indent = '    '
-                let fieldDef = `${indent}${field.fieldName}: `
-
-                // Generate field type
-                fieldDef += generateFieldTypeCode(field)
-
-                // Add description
-                if (field.description) {
-                    fieldDef += `.describe('${field.description}')`
-                }
-
-                // Add optional
-                if (!field.required) {
-                    fieldDef += '.optional()'
-                }
-
-                // Add comma except for last item
-                if (index < fields.length - 1) {
-                    fieldDef += ','
-                }
-
-                schemaLines.push(fieldDef)
-            })
-
-            schemaLines.push('})')
-            setGeneratedSchema(schemaLines.join('\n'))
-        } catch (error) {
-            setGeneratedSchema('// Error generating schema preview')
-        }
-    }
-
-    const generateFieldTypeCode = (field) => {
-        const { fieldType, validation = {} } = field
-
-        switch (fieldType) {
-            case 'string': {
-                let stringCode = 'z.string()'
-                if (validation.minLength) stringCode += `.min(${validation.minLength})`
-                if (validation.maxLength) stringCode += `.max(${validation.maxLength})`
-                if (validation.pattern) stringCode += `.regex(/${validation.pattern}/)`
-                if (validation.email) stringCode = 'z.string().email()'
-                if (validation.url) stringCode = 'z.string().url()'
-                return stringCode
-            }
-
-            case 'number': {
-                let numberCode = 'z.number()'
-                if (validation.min !== undefined) numberCode += `.min(${validation.min})`
-                if (validation.max !== undefined) numberCode += `.max(${validation.max})`
-                if (validation.integer) numberCode += '.int()'
-                return numberCode
-            }
-
-            case 'boolean':
-                return 'z.boolean()'
-
-            case 'array': {
-                let arrayCode
-                if (field.children && field.children.length > 0) {
-                    // Use nested schema for array items
-                    const childSchema = generateNestedObjectCode(field.children)
-                    arrayCode = `z.array(${childSchema})`
-                } else {
-                    // Use simple item type
-                    const itemType = validation.itemType || 'string'
-                    arrayCode = `z.array(z.${itemType}())`
-                }
-                if (validation.minItems) arrayCode += `.min(${validation.minItems})`
-                if (validation.maxItems) arrayCode += `.max(${validation.maxItems})`
-                return arrayCode
-            }
-
-            case 'enum':
-                if (validation.enumValues && validation.enumValues.length > 0) {
-                    const enumValues = validation.enumValues.map((v) => `'${v}'`).join(', ')
-                    return `z.enum([${enumValues}])`
-                }
-                return 'z.string()'
-
-            case 'object':
-                if (field.children && field.children.length > 0) {
-                    return generateNestedObjectCode(field.children)
-                }
-                return 'z.object({})'
-
-            case 'date':
-                return 'z.date()'
-
-            case 'literal':
-                if (validation.value !== undefined) {
-                    return `z.literal('${validation.value}')`
-                }
-                return 'z.string()'
-
-            default:
-                return 'z.string()'
-        }
-    }
-
-    const generateNestedObjectCode = (children) => {
-        if (!children || children.length === 0) {
-            return 'z.object({})'
-        }
-
-        const properties = children
-            .filter((child) => child.fieldName)
-            .map((child) => {
-                const childCode = generateFieldTypeCode(child)
-                const optional = child.required ? '' : '.optional()'
-                const description = child.description ? `.describe('${child.description}')` : ''
-                return `${child.fieldName}: ${childCode}${optional}${description}`
-            })
-
-        return `z.object({\n      ${properties.join(',\n      ')}\n    })`
-    }
 
     const addField = (parentId = null) => {
         const newField = {
@@ -350,31 +222,6 @@ export const ZodSchema = ({ value, onChange, disabled = false }) => {
                     </Typography>
                 </Box>
             )}
-
-            <Divider sx={{ my: 3 }} />
-            <Box sx={{ mt: 2 }}>
-                <Stack direction='row' alignItems='center' spacing={1} sx={{ mb: 1 }}>
-                    <CodeIcon fontSize='small' />
-                    <Typography variant='h6'>Generated Schema Preview</Typography>
-                </Stack>
-                <Box
-                    sx={{
-                        p: 2,
-                        borderRadius: 1,
-                        fontFamily: 'monospace',
-                        fontSize: '0.875rem',
-                        whiteSpace: 'pre-wrap',
-                        maxHeight: 300,
-                        overflow: 'auto',
-                        backgroundColor: 'textBackground.main',
-                        border: 1,
-                        borderColor: 'textBackground.border',
-                        color: 'text.primary'
-                    }}
-                >
-                    {generatedSchema || '// Schema will appear here...'}
-                </Box>
-            </Box>
         </Box>
     )
 }
@@ -383,7 +230,7 @@ const ValidationRules = ({ field, onUpdateValidation, disabled }) => {
     const validationFields = getValidationFields(field.fieldType)
 
     const renderValidationField = (validationType) => {
-        const value = field.validation[validationType] || ''
+        const value = field.validation[validationType] !== undefined ? field.validation[validationType] : ''
 
         switch (validationType) {
             case 'minLength':
@@ -398,7 +245,10 @@ const ValidationRules = ({ field, onUpdateValidation, disabled }) => {
                         label={validationType}
                         type='number'
                         value={value}
-                        onChange={(e) => onUpdateValidation(field.id, validationType, parseInt(e.target.value) || '')}
+                        onChange={(e) => {
+                            const numValue = parseInt(e.target.value)
+                            onUpdateValidation(field.id, validationType, isNaN(numValue) ? '' : numValue)
+                        }}
                         disabled={disabled}
                         size='small'
                         sx={{ mb: 1 }}

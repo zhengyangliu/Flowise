@@ -65,15 +65,6 @@ class StructuredOutputParserAdvancedUI implements INode {
                 ],
                 additionalParams: true,
                 requiresLargeDialog: true
-            },
-            {
-                label: 'Generated Schema Preview',
-                name: 'generatedSchema',
-                type: 'string',
-                description: 'Preview of the generated Zod schema (read-only)',
-                rows: 10,
-                placeholder: 'Generated Zod schema will appear here...',
-                optional: true
             }
         ]
     }
@@ -108,6 +99,10 @@ class StructuredOutputParserAdvancedUI implements INode {
     }
 
     private convertUIConfigToZodSchema(schemaConfig: any[]): z.ZodObject<any> {
+        if (!Array.isArray(schemaConfig) || schemaConfig.length === 0) {
+            return z.object({})
+        }
+
         const rootFields = schemaConfig.filter((field) => !field.parentId)
         return this.createObjectFromFields(rootFields, schemaConfig)
     }
@@ -134,13 +129,14 @@ class StructuredOutputParserAdvancedUI implements INode {
 
     private createZodFieldFromConfig(field: any, allFields: any[]): any {
         const { fieldType, validation = {} } = field
-        const childFields = allFields.filter((f) => f.parentId === field.id)
+
+        const childFields = field.children || allFields.filter((f) => f.parentId === field.id)
 
         switch (fieldType) {
             case 'string': {
                 let stringSchema = z.string()
-                if (validation.minLength) stringSchema = stringSchema.min(validation.minLength)
-                if (validation.maxLength) stringSchema = stringSchema.max(validation.maxLength)
+                if (validation.minLength !== undefined) stringSchema = stringSchema.min(validation.minLength)
+                if (validation.maxLength !== undefined) stringSchema = stringSchema.max(validation.maxLength)
                 if (validation.pattern) stringSchema = stringSchema.regex(new RegExp(validation.pattern))
                 if (validation.email) stringSchema = z.string().email()
                 if (validation.url) stringSchema = z.string().url()
@@ -159,23 +155,29 @@ class StructuredOutputParserAdvancedUI implements INode {
                 return z.boolean()
 
             case 'array': {
-                if (childFields.length > 0) {
+                let arraySchema
+                if (childFields && childFields.length > 0) {
+                    // Use nested schema for array items
                     const itemSchema = this.createObjectFromFields(childFields, allFields)
-                    let arraySchema = z.array(itemSchema)
-                    if (validation.minItems) arraySchema = arraySchema.min(validation.minItems)
-                    if (validation.maxItems) arraySchema = arraySchema.max(validation.maxItems)
-                    return arraySchema
+                    arraySchema = z.array(itemSchema)
                 } else {
+                    // Use simple item type
                     const itemType = validation.itemType || 'string'
                     const itemSchema = this.createZodFieldFromConfig(
-                        { fieldType: itemType, validation: validation.itemValidation || {} },
+                        {
+                            id: 'temp',
+                            fieldName: 'item',
+                            fieldType: itemType,
+                            required: true,
+                            validation: validation.itemValidation || {}
+                        },
                         allFields
                     )
-                    let arraySchema = z.array(itemSchema)
-                    if (validation.minItems) arraySchema = arraySchema.min(validation.minItems)
-                    if (validation.maxItems) arraySchema = arraySchema.max(validation.maxItems)
-                    return arraySchema
+                    arraySchema = z.array(itemSchema)
                 }
+                if (validation.minItems !== undefined) arraySchema = arraySchema.min(validation.minItems)
+                if (validation.maxItems !== undefined) arraySchema = arraySchema.max(validation.maxItems)
+                return arraySchema
             }
 
             case 'enum': {
@@ -186,7 +188,7 @@ class StructuredOutputParserAdvancedUI implements INode {
             }
 
             case 'object': {
-                if (childFields.length > 0) {
+                if (childFields && childFields.length > 0) {
                     return this.createObjectFromFields(childFields, allFields)
                 } else {
                     return z.object({})

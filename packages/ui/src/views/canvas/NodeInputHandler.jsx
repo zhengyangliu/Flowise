@@ -107,100 +107,6 @@ const markdownConverter = new showdown.Converter({
     tasklists: true
 })
 
-// Helper function to generate Zod schema code from UI configuration
-const generateZodSchemaCode = (schemaConfig) => {
-    if (!Array.isArray(schemaConfig) || schemaConfig.length === 0) {
-        return 'z.object({})'
-    }
-
-    const schemaLines = ['z.object({']
-
-    schemaConfig.forEach((field, index) => {
-        const indent = '    '
-        let fieldDef = `${indent}${field.fieldName}: `
-
-        // Generate field type
-        fieldDef += generateFieldTypeCode(field)
-
-        // Add description
-        if (field.description) {
-            fieldDef += `.describe('${field.description}')`
-        }
-
-        // Add optional
-        if (!field.required) {
-            fieldDef += '.optional()'
-        }
-
-        // Add comma except for last item
-        if (index < schemaConfig.length - 1) {
-            fieldDef += ','
-        }
-
-        schemaLines.push(fieldDef)
-    })
-
-    schemaLines.push('})')
-    return schemaLines.join('\n')
-}
-
-const generateFieldTypeCode = (field) => {
-    const { fieldType, validation = {} } = field
-
-    switch (fieldType) {
-        case 'string': {
-            let stringCode = 'z.string()'
-            if (validation.minLength) stringCode += `.min(${validation.minLength})`
-            if (validation.maxLength) stringCode += `.max(${validation.maxLength})`
-            if (validation.pattern) stringCode += `.regex(/${validation.pattern}/)`
-            if (validation.email) stringCode = 'z.string().email()'
-            if (validation.url) stringCode = 'z.string().url()'
-            return stringCode
-        }
-
-        case 'number': {
-            let numberCode = 'z.number()'
-            if (validation.min !== undefined) numberCode += `.min(${validation.min})`
-            if (validation.max !== undefined) numberCode += `.max(${validation.max})`
-            if (validation.integer) numberCode += '.int()'
-            return numberCode
-        }
-
-        case 'boolean':
-            return 'z.boolean()'
-
-        case 'array': {
-            const itemType = validation.itemType || 'string'
-            let arrayCode = `z.array(z.${itemType}())`
-            if (validation.minItems) arrayCode += `.min(${validation.minItems})`
-            if (validation.maxItems) arrayCode += `.max(${validation.maxItems})`
-            return arrayCode
-        }
-
-        case 'enum':
-            if (validation.enumValues && validation.enumValues.length > 0) {
-                const enumValues = validation.enumValues.map((v) => `'${v}'`).join(', ')
-                return `z.enum([${enumValues}])`
-            }
-            return 'z.string()'
-
-        case 'object':
-            return 'z.object({})'
-
-        case 'date':
-            return 'z.date()'
-
-        case 'literal':
-            if (validation.value !== undefined) {
-                return `z.literal('${validation.value}')`
-            }
-            return 'z.string()'
-
-        default:
-            return 'z.string()'
-    }
-}
-
 // ===========================|| NodeInputHandler ||=========================== //
 
 const NodeInputHandler = ({
@@ -1313,17 +1219,6 @@ const NodeInputHandler = ({
                                 value={data.inputs[inputParam.name] ?? JSON.stringify(inputParam.default) ?? '[]'}
                                 onChange={(newValue) => {
                                     data.inputs[inputParam.name] = newValue
-                                    // Also update the generated schema preview if it exists
-                                    const generatedSchemaParam = data.inputParams?.find((p) => p.name === 'generatedSchema')
-                                    if (generatedSchemaParam) {
-                                        try {
-                                            const schemaConfig = JSON.parse(newValue)
-                                            const generatedCode = generateZodSchemaCode(schemaConfig)
-                                            data.inputs['generatedSchema'] = generatedCode
-                                        } catch (error) {
-                                            console.error('Error generating schema preview:', error)
-                                        }
-                                    }
                                 }}
                             />
                         )}
