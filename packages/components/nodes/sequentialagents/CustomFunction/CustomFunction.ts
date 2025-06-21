@@ -125,10 +125,10 @@ class CustomFunction_SeqAgents implements INode {
             for (const key in inputVars) {
                 let value = inputVars[key]
                 if (typeof value === 'string') {
-                    value = handleEscapeCharacters(value, true)
                     if (value.startsWith('{') && value.endsWith('}')) {
                         try {
-                            value = JSON.parse(value)
+                            const parsedValue = JSON.parse(value)
+                            value = handleEscapeCharacters(parsedValue, true)
                             const nodeId = value.id || ''
                             if (nodeId) {
                                 const messages = state.messages as unknown as BaseMessage[]

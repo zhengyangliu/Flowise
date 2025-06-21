@@ -106,10 +106,10 @@ class CustomFunction_Utilities implements INode {
         for (const key in inputVars) {
             let value = inputVars[key]
             if (typeof value === 'string') {
-                value = handleEscapeCharacters(value, true)
                 if (value.startsWith('{') && value.endsWith('}')) {
                     try {
-                        value = JSON.parse(value)
+                        const parsedValue = JSON.parse(value)
+                        value = handleEscapeCharacters(parsedValue, true)
                     } catch (e) {
                         // ignore
                     }
